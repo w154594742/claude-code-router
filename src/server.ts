@@ -21,6 +21,22 @@ export const createServer = (config: any): Server => {
     return await readConfigFile();
   });
 
+  // API Key verification endpoint for UI login
+  server.app.post("/api/auth/verify", async (req, reply) => {
+    try {
+      const { apikey } = req.body as { apikey: string };
+      const config = await readConfigFile();
+
+      if (apikey && apikey === config.APIKEY) {
+        return { success: true, message: "Authentication successful" };
+      }
+
+      reply.status(401).send({ success: false, message: "Invalid API Key" });
+    } catch (error) {
+      reply.status(500).send({ success: false, message: "Server error" });
+    }
+  });
+
   server.app.get("/api/transformers", async () => {
     const transformers =
       server.app._server!.transformerService.getAllTransformers();

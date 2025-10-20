@@ -1,10 +1,18 @@
-version: "3.8"
-
 services:
   claude-code-router:
-    build: .
+    container_name: claude-code-router
+    build:
+      context: .
     ports:
-      - "3456:3456"
+      - "${CCR_HOST_PORT:-3456}:3456"
     volumes:
       - ~/.claude-code-router:/root/.claude-code-router
+    env_file:
+      - .env
+    environment:
+      # Set your API key for UI authentication
+      # This APIKEY will be used to protect both the UI and API endpoints
+      - APIKEY=${APIKEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped

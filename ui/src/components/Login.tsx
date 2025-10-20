@@ -49,35 +49,43 @@ export function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+    setIsLoading(true);
+
     try {
-      // Set the API key
-      api.setApiKey(apiKey);
-      
-      // Dispatch storage event to notify other components of the change
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'apiKey',
-        newValue: apiKey,
-        url: window.location.href
-      }));
-      
-      // Test the API key by fetching config
-      await api.getConfig();
-      
-      // Navigate to dashboard
-      // The ConfigProvider will handle fetching the config
-      navigate('/dashboard');
-    } catch (error: any) {
-      // Clear the API key on failure
-      api.setApiKey('');
-      
-      // Check if it's an unauthorized error
-      if (error.message && error.message.includes('401')) {
-        setError(t('login.invalidApiKey'));
-      } else {
-        // For other errors, still allow access (restricted mode)
+      // Verify the API key using the /api/auth/verify endpoint
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ apikey: apiKey })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Set the API key in ApiClient and localStorage
+        api.setApiKey(apiKey);
+
+        // Dispatch storage event to notify other components of the change
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'apiKey',
+          newValue: apiKey,
+          url: window.location.href
+        }));
+
+        // Navigate to dashboard
         navigate('/dashboard');
+      } else {
+        // Show error message
+        setError(data.message || t('login.invalidApiKey'));
       }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(t('login.connectionError'));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,13 +126,15 @@ export function Login() {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder={t('login.apiKeyPlaceholder')}
+                required
+                disabled={isLoading}
               />
             </div>
             {error && <div className="text-sm text-red-500">{error}</div>}
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
-              {t('login.signIn')}
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? t('login.validating') : t('login.signIn')}
             </Button>
           </CardFooter>
         </form>

@@ -4,7 +4,18 @@ export const apiKeyAuth =
   (config: any) =>
   async (req: FastifyRequest, reply: FastifyReply, done: () => void) => {
     // Public endpoints that don't require authentication
-    if (["/", "/health"].includes(req.url) || req.url.startsWith("/ui")) {
+    if (["/", "/health"].includes(req.url)) {
+      return done();
+    }
+
+    // Verify API endpoint doesn't require authentication (for login)
+    if (req.url === "/api/auth/verify") {
+      return done();
+    }
+
+    // Allow access to UI files without authentication
+    // The React app will handle authentication and redirect to login page
+    if (req.url.startsWith("/ui/")) {
       return done();
     }
 
