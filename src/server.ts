@@ -192,13 +192,6 @@ export const createServer = (config: any): Server => {
   // 清除日志内容端点
   server.app.delete("/api/logs", async (req, reply) => {
     try {
-      const debugLog = {
-        endpoint: 'DELETE /api/logs',
-        headers: req.headers,
-        query: req.query,
-        apiKey: req.headers['x-api-key'] || req.headers['X-API-Key'] || 'NOT_FOUND'
-      };
-      console.error('[DEBUG-CLEAR]', JSON.stringify(debugLog));
       const filePath = (req.query as any).file as string;
       let logFilePath: string;
 
@@ -224,13 +217,6 @@ export const createServer = (config: any): Server => {
   // 删除日志文件端点
   server.app.delete("/api/logs/file", async (req, reply) => {
     try {
-      const debugLog = {
-        endpoint: 'DELETE /api/logs/file',
-        headers: req.headers,
-        query: req.query,
-        apiKey: req.headers['x-api-key'] || req.headers['X-API-Key'] || 'NOT_FOUND'
-      };
-      console.error('[DEBUG-DELETE]', JSON.stringify(debugLog));
       const filePath = (req.query as any).file as string;
 
       // 安全检查:确保文件在日志目录内
