@@ -74,13 +74,10 @@ class ApiClient {
   // Generic fetch wrapper with base URL and authentication
   private async apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const config: RequestInit = {
       ...options,
-      headers: {
-        ...this.createHeaders(),
-        ...options.headers,
-      },
+      headers: options.headers || this.createHeaders(),
     };
     
     try {
@@ -142,6 +139,7 @@ class ApiClient {
   async delete<T>(endpoint: string): Promise<T> {
     return this.apiFetch<T>(endpoint, {
       method: 'DELETE',
+      headers: this.createHeaders(''), // DELETE请求不应该有Content-Type
     });
   }
 
@@ -225,15 +223,20 @@ class ApiClient {
   async getLogFiles(): Promise<Array<{ name: string; path: string; size: number; lastModified: string }>> {
     return this.get<Array<{ name: string; path: string; size: number; lastModified: string }>>('/logs/files');
   }
-  
+
   // Get logs from specific file
   async getLogs(filePath: string): Promise<string[]> {
     return this.get<string[]>(`/logs?file=${encodeURIComponent(filePath)}`);
   }
-  
+
   // Clear logs from specific file
   async clearLogs(filePath: string): Promise<void> {
     return this.delete<void>(`/logs?file=${encodeURIComponent(filePath)}`);
+  }
+
+  // Delete log file
+  async deleteLogFile(filePath: string): Promise<void> {
+    return this.delete<void>(`/logs/file?file=${encodeURIComponent(filePath)}`);
   }
 }
 

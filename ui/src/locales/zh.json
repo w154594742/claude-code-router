@@ -223,6 +223,10 @@
     "worker_error": "Worker错误",
     "worker_init_failed": "Worker初始化失败",
     "grouping_not_supported": "服务器不支持日志分组",
-    "back": "返回"
+    "back": "返回",
+    "delete_file": "删除文件",
+    "delete_file_confirm": "确定要删除此日志文件吗?删除后无法恢复。",
+    "file_deleted": "文件删除成功",
+    "delete_failed": "删除文件失败"
   }
 }

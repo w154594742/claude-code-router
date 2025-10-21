@@ -3,7 +3,7 @@ import { readConfigFile, writeConfigFile, backupConfigFile } from "./utils";
 import { checkForUpdates, performUpdate } from "./utils";
 import { join } from "path";
 import fastifyStatic from "@fastify/static";
-import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from "fs";
+import { readdirSync, statSync, readFileSync, writeFileSync, existsSync, unlinkSync } from "fs";
 import { homedir } from "os";
 import {calculateTokenCount} from "./utils/router";
 
@@ -192,6 +192,13 @@ export const createServer = (config: any): Server => {
   // 清除日志内容端点
   server.app.delete("/api/logs", async (req, reply) => {
     try {
+      const debugLog = {
+        endpoint: 'DELETE /api/logs',
+        headers: req.headers,
+        query: req.query,
+        apiKey: req.headers['x-api-key'] || req.headers['X-API-Key'] || 'NOT_FOUND'
+      };
+      console.error('[DEBUG-CLEAR]', JSON.stringify(debugLog));
       const filePath = (req.query as any).file as string;
       let logFilePath: string;
 
@@ -211,6 +218,37 @@ export const createServer = (config: any): Server => {
     } catch (error) {
       console.error("Failed to clear logs:", error);
       reply.status(500).send({ error: "Failed to clear logs" });
+    }
+  });
+
+  // 删除日志文件端点
+  server.app.delete("/api/logs/file", async (req, reply) => {
+    try {
+      const debugLog = {
+        endpoint: 'DELETE /api/logs/file',
+        headers: req.headers,
+        query: req.query,
+        apiKey: req.headers['x-api-key'] || req.headers['X-API-Key'] || 'NOT_FOUND'
+      };
+      console.error('[DEBUG-DELETE]', JSON.stringify(debugLog));
+      const filePath = (req.query as any).file as string;
+
+      // 安全检查:确保文件在日志目录内
+      const logDir = join(homedir(), ".claude-code-router", "logs");
+      if (!filePath.startsWith(logDir)) {
+        reply.status(403).send({ error: "Access denied" });
+        return;
+      }
+
+      if (existsSync(filePath)) {
+        unlinkSync(filePath);
+        return { success: true, message: "Log file deleted successfully" };
+      } else {
+        reply.status(404).send({ error: "File not found" });
+      }
+    } catch (error) {
+      console.error("Failed to delete log file:", error);
+      reply.status(500).send({ error: "Failed to delete log file" });
     }
   });
 

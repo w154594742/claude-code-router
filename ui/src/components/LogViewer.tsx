@@ -252,7 +252,11 @@ export function LogViewer({ open, onOpenChange, showToast }: LogViewerProps) {
       const response = await api.getLogFiles();
 
       if (response && Array.isArray(response)) {
-        setLogFiles(response);
+        // 前端再次确保按时间倒序排列
+        const sortedFiles = response.sort((a, b) =>
+          new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
+        );
+        setLogFiles(sortedFiles);
         setSelectedFile(null);
         setLogs([]);
       } else {
@@ -333,6 +337,28 @@ export function LogViewer({ open, onOpenChange, showToast }: LogViewerProps) {
       console.error('Failed to clear logs:', error);
       if (showToast) {
         showToast(t('log_viewer.clear_failed') + ': ' + (error as Error).message, 'error');
+      }
+    }
+  };
+
+  const deleteLogFile = async (file: LogFile, event: React.MouseEvent) => {
+    event.stopPropagation(); // 阻止冒泡,避免触发selectFile
+
+    if (!window.confirm(t('log_viewer.delete_file_confirm'))) {
+      return;
+    }
+
+    try {
+      await api.deleteLogFile(file.path);
+      // 重新加载文件列表
+      await loadLogFiles();
+      if (showToast) {
+        showToast(t('log_viewer.file_deleted'), 'success');
+      }
+    } catch (error) {
+      console.error('Failed to delete log file:', error);
+      if (showToast) {
+        showToast(t('log_viewer.delete_failed') + ': ' + (error as Error).message, 'error');
       }
     }
   };
@@ -892,6 +918,14 @@ export function LogViewer({ open, onOpenChange, showToast }: LogViewerProps) {
                           <File className="h-5 w-5 text-blue-600" />
                           <span className="font-medium text-sm">{file.name}</span>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => deleteLogFile(file, e)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50 h-6 w-6 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                       <div className="text-xs text-gray-500 space-y-1">
                         <div>{formatFileSize(file.size)}</div>
