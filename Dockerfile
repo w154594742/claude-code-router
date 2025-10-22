@@ -2,9 +2,11 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
-# 安装 pnpm 和构建依赖
+# 安装 pnpm 和构建依赖,配置国内镜像源
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
-    apk add --no-cache python3 make g++
+    apk add --no-cache python3 make g++ && \
+    npm config set registry https://registry.npmmirror.com && \
+    pnpm config set registry https://registry.npmmirror.com
 
 # 复制package.json和package-lock.json
 COPY package*.json ./
