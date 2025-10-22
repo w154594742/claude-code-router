@@ -15,7 +15,7 @@ export const apiKeyAuth =
 
     // Allow access to UI files without authentication
     // The React app will handle authentication and redirect to login page
-    if (req.url.startsWith("/ui/")) {
+    if (req.url.startsWith("/ui")) {
       return done();
     }
 

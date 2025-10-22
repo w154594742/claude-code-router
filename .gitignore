@@ -1,9 +1,67 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
 .env
+.env.*
+.env.local
+.env.production
+
+# Logs
 log.txt
-.idea
-dist
-.DS_Store
-.vscode
-tsconfig.tsbuildinfo
 logs/
+*.log
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Docker environment files
+.dockerenv
+
+# Spec workflow files (internal use)
+.spec-workflow/
+
+# Development files
+screenshots/
