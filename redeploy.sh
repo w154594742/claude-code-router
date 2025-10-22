@@ -2,6 +2,21 @@
 
 set -e
 
+#################################################################
+# Claude Code Router 自动部署脚本
+#
+# 重要说明：
+# 1. Dockerfile 由 Git 仓库统一管理，包含以下优化：
+#    - pnpm 支持（通过 corepack enable）
+#    - npm 镜像加速（registry.npmmirror.com）
+#    - 构建依赖（python3, make, g++）
+#    - 多阶段构建优化
+#    - PID 文件清理机制
+#
+# 2. 不要在此脚本中动态生成 Dockerfile
+# 3. git pull 会自动获取最新的 Dockerfile 配置
+#################################################################
+
 # 项目配置
 PROJECT_NAME="claude-code-router"
 CONTAINER_NAME="claude-code-router"
@@ -108,57 +123,14 @@ git_pull_latest() {
     log_success "代码已更新到最新版本"
 }
 
-# 创建多阶段 Dockerfile
-create_multistage_dockerfile() {
-    log_info "创建多阶段 Dockerfile..."
-
-    cat > Dockerfile << 'DOCKERFILE_EOF'
-FROM node:20-alpine as builder
-
-WORKDIR /app
-
-# 复制package.json和package-lock.json
-COPY package*.json ./
-
-# 安装所有依赖（包括开发依赖）
-RUN npm install
-
-# 复制源代码
-COPY . .
-
-# 构建项目
-RUN npm run build
-
-# 生产阶段
-FROM node:20-alpine
-
-WORKDIR /app
-
-# 复制package.json和package-lock.json
-COPY package*.json ./
-
-# 只安装生产依赖
-RUN npm install --production
-
-# 从builder阶段复制构建产物
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/ui/dist ./dist
-
-# 复制启动脚本
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# 创建软链接,模拟全局安装的ccr命令
-RUN ln -s /app/dist/cli.js /usr/local/bin/ccr && \
-    chmod +x /app/dist/cli.js
-
-EXPOSE 3456
-
-CMD ["/usr/local/bin/entrypoint.sh"]
-DOCKERFILE_EOF
-
-    log_success "多阶段 Dockerfile 已创建"
-}
+# 注意：Dockerfile 由 Git 仓库管理，包含以下优化配置：
+# - pnpm 支持（通过 corepack）
+# - npm 镜像加速（registry.npmmirror.com）
+# - 构建依赖（python3, make, g++）
+# - 多阶段构建优化
+# - PID 文件清理机制
+#
+# 不再动态生成 Dockerfile，直接使用 Git 仓库中的版本
 
 # 停止并删除现有容器
 stop_containers() {
@@ -352,7 +324,7 @@ main() {
 
     if [ "$SKIP_GIT" = false ]; then
         git_pull_latest
-        create_multistage_dockerfile
+        # Dockerfile 由 Git 仓库管理，无需动态生成
     fi
 
     stop_containers
