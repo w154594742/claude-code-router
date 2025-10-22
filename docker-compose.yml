@@ -4,7 +4,7 @@ services:
     build:
       context: .
     ports:
-      - "${CCR_HOST_PORT:-3456}:3456"
+      - "${CCR_HOST_PORT:-9003}:3456"
     volumes:
       - ~/.claude-code-router:/root/.claude-code-router
     env_file:
