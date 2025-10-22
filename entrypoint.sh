@@ -10,6 +10,9 @@ CONFIG_FILE="$CONFIG_DIR/config.json"
 # 确保配置目录存在
 mkdir -p "$CONFIG_DIR"
 
+# 清理旧的 PID 文件(避免 Docker 重启后检测到旧进程)
+rm -f "$CONFIG_DIR/.claude-code-router.pid"
+
 # 如果配置文件存在，用环境变量替换其中的占位符
 if [ -f "$CONFIG_FILE" ]; then
     # 将 ${APIKEY} 替换为实际的环境变量值
