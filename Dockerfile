@@ -1,3 +1,32 @@
+FROM node:20-alpine as builder
+
+WORKDIR /app
+
+# 安装 pnpm 和构建依赖
+RUN corepack enable && corepack prepare pnpm@latest --activate && \
+    apk add --no-cache python3 make g++
+
+# 复制package.json和package-lock.json
+COPY package*.json ./
+
+# 安装主项目依赖
+RUN npm install
+
+# 复制 UI 项目的 package.json
+COPY ui/package.json ui/pnpm-lock.yaml* ./ui/
+
+# 安装 UI 项目依赖(使用 pnpm)
+WORKDIR /app/ui
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# 复制所有源代码
+WORKDIR /app
+COPY . .
+
+# 构建项目
+RUN npm run build
+
+# 生产阶段
 FROM node:20-alpine
 
 WORKDIR /app
@@ -5,12 +34,11 @@ WORKDIR /app
 # 复制package.json和package-lock.json
 COPY package*.json ./
 
-# 安装依赖
+# 只安装生产依赖
 RUN npm install --production
 
-# 复制构建后的代码和资源
-COPY dist ./dist
-COPY ui/dist ./dist
+# 从builder阶段复制构建产物
+COPY --from=builder /app/dist ./dist
 
 # 复制启动脚本
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
