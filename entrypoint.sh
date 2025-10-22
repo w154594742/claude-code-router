@@ -20,5 +20,5 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# 启动应用
-exec ccr start
+# 启动应用 - 直接运行 Node 脚本,保持前台运行
+exec node /app/dist/cli.js start
