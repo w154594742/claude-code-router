@@ -256,14 +256,16 @@ show_help() {
     echo "选项:"
     echo "  -h, --help          显示此帮助信息"
     echo "  -b, --branch BRANCH 指定要拉取的分支 (默认: dev)"
+    echo "  -y, --yes           自动确认所有询问（适合 CI/CD）"
     echo "  --skip-git          跳过 Git 拉取步骤"
     echo "  --skip-build        跳过构建步骤"
     echo "  --skip-cleanup      跳过清理旧镜像"
     echo ""
     echo "示例:"
-    echo "  $0                  # 使用默认设置重新部署"
-    echo "  $0 -b main          # 从 main 分支拉取并部署"
+    echo "  $0                  # 交互式部署（询问是否拉取代码）"
+    echo "  $0 -y               # 自动拉取代码并部署"
     echo "  $0 --skip-git       # 使用当前代码重新部署"
+    echo "  $0 -b main -y       # 从 main 分支拉取并自动部署"
 }
 
 # 主函数
@@ -272,6 +274,7 @@ main() {
     SKIP_GIT=false
     SKIP_BUILD=false
     SKIP_CLEANUP=false
+    AUTO_YES=false
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -282,6 +285,10 @@ main() {
             -b|--branch)
                 BRANCH="$2"
                 shift 2
+                ;;
+            -y|--yes)
+                AUTO_YES=true
+                shift
                 ;;
             --skip-git)
                 SKIP_GIT=true
@@ -322,9 +329,57 @@ main() {
     check_requirements
     check_project_files
 
-    if [ "$SKIP_GIT" = false ]; then
-        git_pull_latest
-        # Dockerfile 由 Git 仓库管理，无需动态生成
+    # Git 代码更新逻辑（支持智能检测和交互式询问）
+    if [ "$SKIP_GIT" = false ] && [ -z "$REDEPLOY_RESTARTED" ]; then
+        # 检测是否在 Git 仓库中
+        if [ -d ".git" ]; then
+            # 智能检测远程是否有更新
+            log_info "检查远程更新..."
+            if git fetch origin "$BRANCH" 2>/dev/null; then
+                LOCAL=$(git rev-parse HEAD 2>/dev/null)
+                REMOTE=$(git rev-parse "origin/$BRANCH" 2>/dev/null)
+
+                if [ "$LOCAL" != "$REMOTE" ]; then
+                    echo ""
+                    echo "🔍 检测到远程有新代码"
+                    echo "📝 本地版本: ${LOCAL:0:7}"
+                    echo "📦 远程版本: ${REMOTE:0:7}"
+                    echo ""
+                fi
+            fi
+
+            # 交互式询问（除非使用了 --yes）
+            SHOULD_PULL=false
+            if [ "$AUTO_YES" = true ]; then
+                log_info "自动确认模式，将拉取最新代码"
+                SHOULD_PULL=true
+            else
+                read -p "是否拉取最新代码并重新执行脚本？[Y/n] " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+                    SHOULD_PULL=true
+                fi
+            fi
+
+            # 执行拉取并重启脚本
+            if [ "$SHOULD_PULL" = true ]; then
+                git_pull_latest
+
+                # 重启脚本使用新版本
+                log_info "代码已更新，重新启动脚本使用新版本..."
+                echo ""
+                export REDEPLOY_RESTARTED=1
+                exec "$0" "$@"
+            else
+                log_warning "跳过 Git 拉取，使用当前代码继续部署"
+            fi
+        else
+            log_warning "当前目录不是 Git 仓库，跳过 Git 操作"
+        fi
+    elif [ "$SKIP_GIT" = true ]; then
+        log_info "已跳过 Git 拉取步骤（使用 --skip-git 参数）"
+    elif [ -n "$REDEPLOY_RESTARTED" ]; then
+        log_success "正在使用更新后的脚本版本"
     fi
 
     stop_containers
