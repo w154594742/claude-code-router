@@ -1,7 +1,7 @@
 {
-  "name": "temp-project",
+  "name": "@musistudio/claude-code-router-ui",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.73",
   "type": "module",
   "scripts": {
     "dev": "vite",
