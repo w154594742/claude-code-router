@@ -3,7 +3,7 @@ import { sessionUsageCache, Usage } from "./cache";
 import { readFile, access } from "fs/promises";
 import { opendir, stat } from "fs/promises";
 import { join } from "path";
-import { CLAUDE_PROJECTS_DIR, HOME_DIR } from "@musistudio/claude-code-router-shared";
+import { CLAUDE_PROJECTS_DIR, HOME_DIR } from "@CCR/shared";
 import { LRUCache } from "lru-cache";
 
 // Types from @anthropic-ai/sdk

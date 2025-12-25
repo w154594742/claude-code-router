@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { execSync } from "child_process";
-import { CONFIG_FILE } from "@musistudio/claude-code-router-shared";
+import { CONFIG_FILE } from "@CCR/shared";
 import JSON5 from "json5";
 
 export interface StatusLineModuleConfig {

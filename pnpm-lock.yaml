@@ -23,15 +23,15 @@ importers:
 
   packages/cli:
     dependencies:
+      '@CCR/server':
+        specifier: workspace:*
+        version: link:../server
+      '@CCR/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@inquirer/prompts':
         specifier: ^5.0.0
         version: 5.5.0
-      '@musistudio/claude-code-router-server':
-        specifier: workspace:*
-        version: link:../server
-      '@musistudio/claude-code-router-shared':
-        specifier: workspace:*
-        version: link:../shared
       find-process:
         specifier: ^2.0.0
         version: 2.0.0
@@ -57,12 +57,12 @@ importers:
 
   packages/server:
     dependencies:
+      '@CCR/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@fastify/static':
         specifier: ^8.2.0
         version: 8.2.0
-      '@musistudio/claude-code-router-shared':
-        specifier: workspace:*
-        version: link:../shared
       '@musistudio/llms':
         specifier: ^1.0.51
         version: 1.0.51(ws@8.18.3)

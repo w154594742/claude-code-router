@@ -1,6 +1,6 @@
 {
-  "name": "@musistudio/claude-code-router-cli",
-  "version": "1.0.73",
+  "name": "@CCR/cli",
+  "version": "2.0.0",
   "description": "CLI for Claude Code Router",
   "bin": {
     "ccr": "dist/cli.js"
@@ -18,9 +18,9 @@
   "author": "musistudio",
   "license": "MIT",
   "dependencies": {
-    "@musistudio/claude-code-router-shared": "workspace:*",
+    "@CCR/shared": "workspace:*",
     "@inquirer/prompts": "^5.0.0",
-    "@musistudio/claude-code-router-server": "workspace:*",
+    "@CCR/server": "workspace:*",
     "find-process": "^2.0.0",
     "minimist": "^1.2.8",
     "openurl": "^1.1.1"

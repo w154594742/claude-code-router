@@ -1,6 +1,6 @@
 {
-  "name": "@musistudio/claude-code-router-shared",
-  "version": "1.0.73",
+  "name": "@CCR/shared",
+  "version": "2.0.0",
   "description": "Shared utilities and constants for Claude Code Router",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

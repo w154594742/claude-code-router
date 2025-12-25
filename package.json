@@ -1,17 +1,22 @@
 {
   "name": "@musistudio/claude-code-router",
-  "version": "1.0.73",
+  "version": "2.0.0",
   "description": "Use Claude Code without an Anthropics account and route it to another LLM provider",
   "private": true,
   "scripts": {
     "build": "node scripts/build.js",
-    "build:cli": "pnpm --filter @musistudio/claude-code-router-cli build",
-    "build:server": "pnpm --filter @musistudio/claude-code-router-server build",
-    "build:ui": "pnpm --filter @musistudio/claude-code-router-ui build",
-    "release": "pnpm build && pnpm publish -r",
-    "dev:cli": "pnpm --filter @musistudio/claude-code-router-cli dev",
-    "dev:server": "pnpm --filter @musistudio/claude-code-router-server dev",
-    "dev:ui": "pnpm --filter @musistudio/claude-code-router-ui dev"
+    "build:cli": "pnpm --filter @CCR/cli build",
+    "build:server": "pnpm --filter @CCR/server build",
+    "build:ui": "pnpm --filter @CCR/ui build",
+    "release": "pnpm build && bash scripts/release.sh all",
+    "release:npm": "bash scripts/release.sh npm",
+    "release:docker": "bash scripts/release.sh docker",
+    "dev:cli": "pnpm --filter @CCR/cli dev",
+    "dev:server": "pnpm --filter @CCR/server dev",
+    "dev:ui": "pnpm --filter @CCR/ui dev"
+  },
+  "bin": {
+    "ccr": "dist/cli.js"
   },
   "keywords": [
     "claude",
