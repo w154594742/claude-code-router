@@ -50,27 +50,6 @@ curl -H "x-api-key: your-api-key" http://localhost:3456/api/config
 | `/ui` | GET | Web 管理界面 |
 | `/ui/` | GET | Web 管理界面（重定向） |
 
-## 错误响应
-
-所有 API 在发生错误时返回统一的错误格式：
-
-```json
-{
-  "error": {
-    "type": "invalid_request_error",
-    "message": "错误描述"
-  }
-}
-```
-
-常见 HTTP 状态码：
-
-- `200` - 成功
-- `400` - 请求参数错误
-- `401` - 未授权（API Key 无效）
-- `404` - 资源不存在
-- `500` - 服务器内部错误
-
 ## 认证
 
 ### API Key 认证
@@ -82,16 +61,6 @@ curl -X POST http://localhost:3456/v1/messages \
   -H "x-api-key: your-api-key" \
   -H "content-type: application/json" \
   -d '...'
-```
-
-### 无认证模式
-
-当没有配置 Providers 时，服务器会监听在 `0.0.0.0` 且无需认证：
-
-```json5
-{
-  "Providers": []
-}
 ```
 
 ## 流式响应
@@ -117,13 +86,3 @@ data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}
 event: message_stop
 data: {"type":"message_stop"}
 ```
-
-## 速率限制
-
-服务器本身不实现速率限制，建议通过反向代理（如 Nginx）配置。
-
-## 版本管理
-
-当前 API 版本：`v1`
-
-所有 `/v1/*` 端点保持向后兼容。

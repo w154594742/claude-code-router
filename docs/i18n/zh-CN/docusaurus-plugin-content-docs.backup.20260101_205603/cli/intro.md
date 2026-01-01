@@ -12,12 +12,12 @@ Claude Code Router CLI (`ccr`) 是一个命令行工具，用于管理和控制 
 - **代码执行**：直接执行 `claude` 命令
 - **环境集成**：输出环境变量用于 shell 集成
 - **Web UI**：打开 Web 管理界面
-- **状态栏**：集成到编辑器状态栏
+- **状态栏**：使用 `ccr statusline` 显示自定义会话状态
 
 ## 安装
 
 ```bash
-npm install -g @musistudio/claude-code-router-cli
+npm install -g @musistudio/claude-code-router
 ```
 
 或使用项目别名：
@@ -80,4 +80,5 @@ eval "$(ccr activate)"
 - [安装指南](/docs/cli/installation) - 详细安装说明
 - [快速开始](/docs/cli/quick-start) - 5 分钟上手
 - [命令参考](/docs/category/cli-commands) - 完整命令列表
+- [状态栏](/docs/cli/commands/statusline) - 自定义状态栏
 - [配置说明](/docs/category/cli-config) - 配置文件详解
