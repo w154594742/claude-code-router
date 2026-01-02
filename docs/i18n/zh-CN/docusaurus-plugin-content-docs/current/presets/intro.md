@@ -31,10 +31,6 @@ ccr preset install /path/to/preset-directory
 ccr preset install my-preset
 ```
 
-:::note 注意
-CLI 方式**不支持**从 URL 直接安装预设。如需从 GitHub 安装，请先克隆到本地或使用 Web UI。
-:::
-
 #### 使用预设
 
 安装预设后，可以使用预设名称启动 Claude Code：
@@ -42,9 +38,6 @@ CLI 方式**不支持**从 URL 直接安装预设。如需从 GitHub 安装，�
 ```bash
 # 使用指定预设启动
 ccr my-preset "your prompt"
-
-# 后台任务使用预设
-ccr my-preset --background "your prompt"
 ```
 
 预设会：
@@ -89,13 +82,6 @@ ccr ui
 1. 点击"预设商城"按钮
 2. 在预设列表中选择要安装的预设
 3. 点击"安装"按钮
-
-或手动输入 GitHub 仓库地址：
-
-```
-格式：https://github.com/username/repo
-示例：https://github.com/example/ccr-presets
-```
 
 #### 重新配置预设
 
@@ -310,13 +296,13 @@ CCR 引入了强大的动态配置系统，支持：
     "Providers": [
       {
         "name": "{{primaryProvider}}",
-        "api_base_url": "https://api.openai.com/v1",
+        "api_base_url": "https://api.openai.com/v1/chat/completions",
         "api_key": "{{apiKey}}",
         "models": ["{{defaultModel}}"]
       }
     ],
     "Router": {
-      "default": "{{primaryProvider}}/{{defaultModel}}"
+      "default": "{{primaryProvider}},{{defaultModel}}"
     },
     "PROXY_URL": "{{proxyUrl}}"
   },
@@ -353,9 +339,6 @@ CCR 引入了强大的动态配置系统，支持：
 | `license` | string | - | 许可证类型 |
 | `keywords` | string[] | - | 关键词标签 |
 | `ccrVersion` | string | - | 兼容的 CCR 版本 |
-| `source` | string | - | 预设来源 URL |
-| `sourceType` | string | - | 来源类型（`local`/`gist`/`registry`） |
-| `checksum` | string | - | 内容校验和（SHA256） |
 
 示例：
 
@@ -383,6 +366,14 @@ CCR 引入了强大的动态配置系统，支持：
 | `Router` | object | 路由配置 |
 | `transformers` | array | 转换器配置 |
 | `StatusLine` | object | 状态栏配置 |
+| `NON_INTERACTIVE_MODE` | boolean | 启用非交互模式（用于 CI/CD） |
+
+**CLI 专用字段**（这些字段仅在 CLI 模式下有效，服务器不使用）：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `noServer` | boolean | 跳过本地服务器启动，直接使用 Provider 的 API |
+| `claudeCodeSettings` | object | Claude Code 特定设置（环境变量、状态栏等） |
 
 示例：
 
@@ -391,14 +382,14 @@ CCR 引入了强大的动态配置系统，支持：
   "Providers": [
     {
       "name": "openai",
-      "api_base_url": "https://api.openai.com/v1",
+      "api_base_url": "https://api.openai.com/v1/chat/completions",
       "api_key": "${OPENAI_API_KEY}",
       "models": ["gpt-4o", "gpt-4o-mini"]
     }
   ],
   "Router": {
-    "default": "openai/gpt-4o",
-    "background": "openai/gpt-4o-mini"
+    "default": "openai,gpt-4o",
+    "background": "openai,gpt-4o-mini"
   },
   "PORT": 8080
 }
@@ -414,7 +405,6 @@ CCR 引入了强大的动态配置系统，支持：
 | `template` | object | 配置模板（使用变量引用） |
 | `configMappings` | array | 配置映射规则 |
 | `userValues` | object | 用户填写的值（运行时使用） |
-| `requiredInputs` | array | 必填输入项列表（自动生成） |
 
 **schema 字段类型：**
 
@@ -484,24 +474,16 @@ cat > ~/.claude-code-router/presets/simple-openai/manifest.json << 'EOF'
   "Providers": [
     {
       "name": "openai",
-      "api_base_url": "https://api.openai.com/v1",
+      "api_base_url": "https://api.openai.com/v1/chat/completions",
       "api_key": "${OPENAI_API_KEY}",
       "models": ["gpt-4o", "gpt-4o-mini"]
     }
   ],
 
   "Router": {
-    "default": "openai/gpt-4o",
-    "background": "openai/gpt-4o-mini"
-  },
-
-  "requiredInputs": [
-    {
-      "id": "Providers[0].api_key",
-      "prompt": "Enter OpenAI API Key",
-      "placeholder": "OPENAI_API_KEY"
-    }
-  ]
+    "default": "openai,gpt-4o",
+    "background": "openai,gpt-4o-mini"
+  }
 }
 EOF
 
@@ -585,14 +567,14 @@ cat > ~/.claude-code-router/presets/advanced-config/manifest.json << 'EOF'
     "Providers": [
       {
         "name": "#{provider}",
-        "api_base_url": "#{provider === 'openai' ? 'https://api.openai.com/v1' : 'https://api.deepseek.com'}",
+        "api_base_url": "#{provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://api.deepseek.com/v1/chat/completions'}",
         "api_key": "#{apiKey}",
         "models": ["gpt-4o", "gpt-4o-mini"]
       }
     ],
     "Router": {
-      "default": "#{provider}/gpt-4o",
-      "background": "#{provider}/gpt-4o-mini"
+      "default": "#{provider},gpt-4o",
+      "background": "#{provider},gpt-4o-mini"
     }
   },
 
@@ -639,12 +621,6 @@ ccr preset export my-exported-preset \
   --author "Your Name" \
   --tags "production,openai"
 ```
-
-:::tip 分享预设
-导出的预设目录可以直接分享给他人。接收者可以：
-- **CLI 方式**：将目录放到 `~/.claude-code-router/presets/`，然后运行 `ccr preset install 预设名`
-- **Web UI 方式**：将目录上传到 GitHub，然后通过仓库 URL 安装
-:::
 
 ## 预设文件位置
 
